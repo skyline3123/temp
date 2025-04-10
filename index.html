@@ -44,15 +44,16 @@
   </div>
 
   <script>
-    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // ← 꼭 입력하세요
+    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // ← 꼭 입력!
     const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 
     const today = new Date();
-    const tomorrow = new Date(today);
+    const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
 
     const baseDate = today.toISOString().slice(0, 10).replace(/-/g, "");
     const targetFcstDate = tomorrow.toISOString().slice(0, 10).replace(/-/g, "");
+
     document.getElementById("dateDisplay").innerText = `📅 기준일: ${baseDate}, 예보일: ${targetFcstDate}`;
 
     async function fetchForecast(nx, ny) {
@@ -119,8 +120,26 @@
       const ctx = document.getElementById(ctxId).getContext("2d");
       if (Chart.getChart(ctxId)) Chart.getChart(ctxId).destroy();
 
-      // ⏱️ rotation 계산: 08시 조각 중심이 240도 방향에 오도록 보정
-      const degrees = 240 - (360 / times.length) / 2;
+      const textPlugin = {
+        id: "textPlugin",
+        afterDraw(chart) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+          ctx.save();
+          meta.data.forEach((arc, i) => {
+            const center = arc.tooltipPosition();
+            ctx.font = "bold 12px Arial";
+            ctx.fillStyle = "black";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(times[i].slice(0, 2) + "시", center.x, center.y - 14);
+            ctx.fillText(Math.round(values[i]) + "℃", center.x, center.y + 4);
+          });
+          ctx.restore();
+        }
+      };
+
+      const degrees = 240 - (360 / 13 / 2); // 08시가 중심으로 시계 8시 방향
       const rotation = degrees * Math.PI / 180;
 
       return new Chart(ctx, {
@@ -134,21 +153,15 @@
           }]
         },
         options: {
-          rotation: rotation,
+          rotation: rotation, // 🎯 정확히 08시가 시계 8시방향 중심에 오도록
           cutout: "60%",
-          circumference: 2 * Math.PI,
           plugins: {
             legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const i = context.dataIndex;
-                  return `${times[i].slice(0,2)}시: ${Math.round(values[i])}℃`;
-                }
-              }
-            }
+            tooltip: { enabled: false },
+            textPlugin
           }
-        }
+        },
+        plugins: [textPlugin]
       });
     }
 
