@@ -1,84 +1,181 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시간별 체감온도 예보 (도넛 그래프)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>화성시 & 평택시 기온 예보</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    .chart-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+    canvas {
+      max-width: 300px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+  </style>
 </head>
 <body>
-    <h2>시간별 체감온도 예보 (도넛 그래프)</h2>
-    <canvas id="tempChart" width="500" height="500"></canvas>
+  <h1>🌡 화성시 & 평택시 기온 및 체감온도 예보 (내일)</h1>
+  <div id="dateDisplay">📅 기준일: 불러오는 중...</div>
+  <button onclick="loadBoth()">예보 불러오기</button>
 
-    <script>
-        async function fetchWeatherData() {
-            try {
-                const response = await fetch("/api/weather");  // 🔹 Flask API에서 데이터 가져오기
-                const data = await response.json();
+  <h2>🔵 화성시 예보</h2>
+  <div class="chart-row">
+    <canvas id="tempHwaseong"></canvas>
+    <canvas id="feelsHwaseong"></canvas>
+  </div>
 
-                console.log("📌 API 응답 데이터:", data); // 🔹 콘솔에서 API 데이터 확인
+  <h2>🔴 평택시 예보</h2>
+  <div class="chart-row">
+    <canvas id="tempPyeongtaek"></canvas>
+    <canvas id="feelsPyeongtaek"></canvas>
+  </div>
 
-                if (!data || data.length === 0) {
-                    alert("체감온도 데이터를 가져올 수 없습니다.");
-                    return;
-                }
+  <script>
+    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // ← 꼭 입력하세요!
+    const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 
-                const today = new Date();
-                const todayString = today.getFullYear().toString() +
-                                    String(today.getMonth() + 1).padStart(2, '0') +
-                                    String(today.getDate()).padStart(2, '0');
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
-                console.log("📌 오늘 날짜:", todayString);
+    const baseDate = today.toISOString().slice(0, 10).replace(/-/g, "");
+    const targetFcstDate = tomorrow.toISOString().slice(0, 10).replace(/-/g, "");
+    document.getElementById("dateDisplay").innerText = `📅 기준일: ${baseDate}, 예보일: ${targetFcstDate}`;
 
-                const filteredData = data.filter(item => {
-                    const hour = parseInt(item.time.slice(0, 2)); 
-                    return item.date === todayString && hour >= 8 && hour <= 20;
-                });
+    async function fetchForecast(nx, ny) {
+      const url = `${API_URL}?serviceKey=${API_KEY}&numOfRows=1000&pageNo=1&dataType=JSON&base_date=${baseDate}&base_time=0500&nx=${nx}&ny=${ny}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      const items = data.response.body.items.item;
 
-                if (filteredData.length === 0) {
-                    alert("오늘 08시~20시 사이의 체감온도 데이터가 없습니다.");
-                    return;
-                }
+      let temps = new Map();
+      let humids = new Map();
 
-                const labels = filteredData.map(item => `${item.time.slice(0, 2)}시`);
-                const feelsLikeTemps = filteredData.map(item => item.feels_like);
-
-                const ctx = document.getElementById('tempChart').getContext('2d');
-                Chart.register(ChartDataLabels);
-
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: '체감온도 (°C)',
-                            data: feelsLikeTemps,
-                            backgroundColor: feelsLikeTemps.map(temp => temp >= 30 ? 'red' : 'skyblue'),
-                            borderColor: 'white',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: true },
-                            datalabels: {
-                                color: 'black',
-                                font: { weight: 'bold', size: 14 },
-                                formatter: (value) => value + "°C"
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error("🚨 데이터 로딩 중 오류 발생:", error);
-                alert("데이터 로딩 실패!");
-            }
+      items.forEach(item => {
+        if (item.fcstDate !== targetFcstDate) return;
+        const time = parseInt(item.fcstTime);
+        if (time >= 800 && time <= 2000) {
+          if (item.category === "TMP") temps.set(time, parseFloat(item.fcstValue));
+          if (item.category === "REH") humids.set(time, parseFloat(item.fcstValue));
         }
+      });
 
-        fetchWeatherData();
-    </script>
+      const times = [];
+      const tempValues = [];
+      const humidValues = [];
+
+      for (let t = 800; t <= 2000; t += 100) {
+        if (temps.has(t) && humids.has(t)) {
+          times.push(t.toString().padStart(4, "0"));
+          tempValues.push(temps.get(t));
+          humidValues.push(humids.get(t));
+        }
+      }
+
+      const feelsLikeValues = tempValues.map((Ta, i) => {
+        const RH = humidValues[i];
+        const Tw = calculateWetBulbTemperature(Ta, RH);
+        return calculateFeelsLikeTemperature(Ta, Tw);
+      });
+
+      return { times, tempValues, feelsLikeValues };
+    }
+
+    function calculateWetBulbTemperature(Ta, RH) {
+      return Ta * Math.atan(0.151977 * Math.pow(RH + 8.313659, 0.5))
+        + Math.atan(Ta + RH)
+        - Math.atan(RH - 1.67633)
+        + 0.00391838 * Math.pow(RH, 1.5) * Math.atan(0.023101 * RH)
+        - 4.686035;
+    }
+
+    function calculateFeelsLikeTemperature(Ta, Tw) {
+      return -0.2442 + 0.55399 * Tw + 0.45535 * Ta
+        - 0.0022 * Tw * Tw + 0.00278 * Tw * Ta + 3.0;
+    }
+
+    function getColor(temp) {
+      if (temp < 10) return "skyblue";
+      if (temp < 20) return "lightgreen";
+      if (temp < 28) return "khaki";
+      if (temp < 33) return "orange";
+      return "red";
+    }
+
+    function polarChart(ctxId, times, values) {
+      const ctx = document.getElementById(ctxId).getContext("2d");
+      if (Chart.getChart(ctxId)) Chart.getChart(ctxId).destroy();
+
+      // ✅ rotation 보정: 08시 중심이 240도(시계 8시방향)에 위치하도록
+      const degrees = 240 - (360 / times.length) / 2;
+      const rotation = degrees * Math.PI / 180;
+
+      // 텍스트 직접 표시 플러그인
+      const textPlugin = {
+        id: "textPlugin",
+        afterDraw(chart) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+          ctx.save();
+          meta.data.forEach((arc, i) => {
+            const center = arc.tooltipPosition();
+            ctx.font = "bold 12px Arial";
+            ctx.fillStyle = "black";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(times[i].slice(0, 2) + "시", center.x, center.y - 12);
+            ctx.fillText(Math.round(values[i]) + "℃", center.x, center.y + 6);
+          });
+          ctx.restore();
+        }
+      };
+
+      return new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: times,
+          datasets: [{
+            data: new Array(times.length).fill(1),
+            backgroundColor: values.map(getColor),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          rotation: rotation,
+          cutout: "60%",
+          circumference: 2 * Math.PI,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+            textPlugin
+          }
+        },
+        plugins: [textPlugin]
+      });
+    }
+
+    async function loadBoth() {
+      const hwaseong = await fetchForecast(55, 119);
+      const pyeongtaek = await fetchForecast(61, 114);
+
+      polarChart("tempHwaseong", hwaseong.times, hwaseong.tempValues);
+      polarChart("feelsHwaseong", hwaseong.times, hwaseong.feelsLikeValues);
+      polarChart("tempPyeongtaek", pyeongtaek.times, pyeongtaek.tempValues);
+      polarChart("feelsPyeongtaek", pyeongtaek.times, pyeongtaek.feelsLikeValues);
+    }
+  </script>
 </body>
 </html>
