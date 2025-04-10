@@ -44,7 +44,7 @@
   </div>
 
   <script>
-    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // ← 꼭 입력하세요!
+    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // ← 꼭 입력하세요
     const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 
     const today = new Date();
@@ -119,29 +119,9 @@
       const ctx = document.getElementById(ctxId).getContext("2d");
       if (Chart.getChart(ctxId)) Chart.getChart(ctxId).destroy();
 
-      // ✅ rotation 보정: 08시 중심이 240도(시계 8시방향)에 위치하도록
+      // ⏱️ rotation 계산: 08시 조각 중심이 240도 방향에 오도록 보정
       const degrees = 240 - (360 / times.length) / 2;
       const rotation = degrees * Math.PI / 180;
-
-      // 텍스트 직접 표시 플러그인
-      const textPlugin = {
-        id: "textPlugin",
-        afterDraw(chart) {
-          const { ctx } = chart;
-          const meta = chart.getDatasetMeta(0);
-          ctx.save();
-          meta.data.forEach((arc, i) => {
-            const center = arc.tooltipPosition();
-            ctx.font = "bold 12px Arial";
-            ctx.fillStyle = "black";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(times[i].slice(0, 2) + "시", center.x, center.y - 12);
-            ctx.fillText(Math.round(values[i]) + "℃", center.x, center.y + 6);
-          });
-          ctx.restore();
-        }
-      };
 
       return new Chart(ctx, {
         type: "doughnut",
@@ -159,11 +139,16 @@
           circumference: 2 * Math.PI,
           plugins: {
             legend: { display: false },
-            tooltip: { enabled: false },
-            textPlugin
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const i = context.dataIndex;
+                  return `${times[i].slice(0,2)}시: ${Math.round(values[i])}℃`;
+                }
+              }
+            }
           }
-        },
-        plugins: [textPlugin]
+        }
       });
     }
 
