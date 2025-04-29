@@ -139,12 +139,8 @@
         }
       };
 
-      // 🔥 08시를 제3사분면(↙) 중심에 정확히 맞추는 계산
-      const totalCount = times.length; // 예: 13개
-      const firstHour = parseInt(times[0].slice(0, 2)); // 예: 08
-      const diffIndex = (firstHour - 8 + 24) % 24; // 08시 기준 차이
-      const degrees = 225 - (diffIndex * (360 / totalCount)) - (360 / totalCount) / 2;
-      const rotation = degrees * Math.PI / 180;
+      // ✅ 08시 기준 제3사분면(225도) 중심 위치 보장
+      const rotation = (225 - (8 * (360 / 24))) * Math.PI / 180;
 
       return new Chart(ctx, {
         type: "doughnut",
