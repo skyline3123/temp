@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>화성시 & 평택시 기온 예보 (24시간)</title>
+  <title>화성시 & 평택시 기온 예보</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -27,7 +27,7 @@
   </style>
 </head>
 <body>
-  <h1>🌡 화성시 & 평택시 24시간 기온 및 체감온도 예보 (내일)</h1>
+  <h1>🌡 화성시 & 평택시 기온 및 체감온도 예보 (내일)</h1>
   <div id="dateDisplay">📅 기준일: 불러오는 중...</div>
   <button onclick="loadBoth()">예보 불러오기</button>
 
@@ -44,7 +44,7 @@
   </div>
 
   <script>
-    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // 🔥 발급받은 서비스키
+    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // 🔥 자신의 서비스 키 입력!
     const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 
     const today = new Date();
@@ -68,7 +68,7 @@
       items.forEach(item => {
         if (item.fcstDate !== targetFcstDate) return;
         const time = parseInt(item.fcstTime);
-        if (time >= 0 && time <= 2300) {
+        if (time >= 800 && time <= 2000) {
           if (item.category === "TMP") temps.set(time, parseFloat(item.fcstValue));
           if (item.category === "REH") humids.set(time, parseFloat(item.fcstValue));
         }
@@ -78,7 +78,7 @@
       const tempValues = [];
       const humidValues = [];
 
-      for (let t = 0; t <= 2300; t += 100) {
+      for (let t = 800; t <= 2000; t += 100) {
         if (temps.has(t) && humids.has(t)) {
           times.push(t.toString().padStart(4, "0"));
           tempValues.push(temps.get(t));
@@ -128,18 +128,18 @@
           ctx.save();
           meta.data.forEach((arc, i) => {
             const center = arc.tooltipPosition();
-            ctx.font = "bold 9px Arial";
+            ctx.font = "bold 12px Arial";
             ctx.fillStyle = "black";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(times[i].slice(0, 2) + "시", center.x, center.y - 10);
+            ctx.fillText(times[i].slice(0, 2) + "시", center.x, center.y - 14);
             ctx.fillText(Math.round(values[i]) + "℃", center.x, center.y + 4);
           });
           ctx.restore();
         }
       };
 
-      const degrees = 225 - (360 / 24) * 8;  // 🔥 24시간 기준, 08시를 제3사분면에 위치
+      const degrees = 225 - (360 / 13 / 2); // ⭐ 08시를 제3사분면 중심에 정확히 위치
       const rotation = degrees * Math.PI / 180;
 
       return new Chart(ctx, {
