@@ -44,7 +44,7 @@
   </div>
 
   <script>
-    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // ← 꼭 입력!
+    const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D"; // 🔥 자신의 서비스 키 입력!
     const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 
     const today = new Date();
@@ -139,7 +139,7 @@
         }
       };
 
-      const degrees = 240 - (360 / 13 / 2); // 08시가 중심으로 시계 8시 방향
+      const degrees = 225 - (360 / 13 / 2); // ⭐ 08시를 제3사분면 중심에 정확히 위치
       const rotation = degrees * Math.PI / 180;
 
       return new Chart(ctx, {
@@ -153,7 +153,7 @@
           }]
         },
         options: {
-          rotation: rotation, // 🎯 정확히 08시가 시계 8시방향 중심에 오도록
+          rotation: rotation,
           cutout: "60%",
           plugins: {
             legend: { display: false },
