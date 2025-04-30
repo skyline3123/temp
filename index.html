@@ -139,8 +139,9 @@
         }
       };
 
-      // ✅ 08시 기준 제3사분면(225도) 중심 위치 보장
-      const rotation = (225 - (8 * (360 / 24))) * Math.PI / 180;
+      const sliceAngle = 360 / times.length;       // ✅ 각 조각의 각도
+      const degrees = 225 - (sliceAngle / 2);      // ✅ 조각 중심을 225도에 정렬
+      const rotation = degrees * Math.PI / 180;    // ✅ 라디안 변환
 
       return new Chart(ctx, {
         type: "doughnut",
@@ -177,4 +178,3 @@
   </script>
 </body>
 </html>
-
