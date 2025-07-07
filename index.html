@@ -20,8 +20,8 @@
       margin-bottom: 20px;
     }
     canvas {
-      max-width: 280px;
-      max-height: 280px;
+      max-width: 300px;
+      max-height: 300px;
       width: 100%;
       height: auto;
     }
@@ -141,12 +141,12 @@ function polarChart(ctxId, times, values, labelText) {
       meta.data.forEach((arc, i) => {
         const label = chart.data.labels[i];
         if (!label || label === '') return;
-        const radius = arc.outerRadius + 20;
+        const radius = arc.outerRadius + 30;
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const x = chart.width / 2 + radius * Math.cos(angle);
         const y = chart.height / 2 + radius * Math.sin(angle);
         const hourOnly = label.slice(0, 2);
-        ctx.font = "bold 14px Arial";
+        ctx.font = "bold 12px Arial";
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
         ctx.fillText(hourOnly + "시", x, y);
@@ -161,11 +161,10 @@ function polarChart(ctxId, times, values, labelText) {
     id: 'centerPlugin',
     beforeDraw(chart) {
       const { width, height, ctx } = chart;
-      const label = labelText[0] + "\n" + labelText[1];
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'bold 16px Arial';
+      ctx.font = 'bold 14px Arial';
       ctx.fillStyle = 'black';
       ctx.fillText(labelText[0], width / 2, height / 2 - 10);
       ctx.fillStyle = '#E0002B';
@@ -185,8 +184,7 @@ function polarChart(ctxId, times, values, labelText) {
         realValues: values
       }]
     },
-      
-    options: {
+  options: {
       cutout: "60%",
             rotation: 235,
   radius: '90%', 
