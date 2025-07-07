@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>화성시 & 평택시 체감온도 예보</title>
+  <title>체감온도 예보</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -20,8 +20,8 @@
       margin-bottom: 20px;
     }
     canvas {
-      max-width: 130px;
-      max-height: 130px;
+      max-width: 200px;
+      max-height: 200px;
       width: 100%;
       height: auto;
     }
@@ -31,107 +31,39 @@
       font-size: 16px;
       line-height: 1.5;
     }
-    select {
-      border-radius: 4px;
-      border: 2px solid #fff;
-      width: 120px;
-      height: 35px;
-      margin: 5px;
-    }
   </style>
 </head>
 <body>
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
-<h1 style="font-size: 30px; font-family: 'Jua', sans-serif;">🌡내일 시간대별 체감온도 예보</h1>
+<h1 style="font-size: 30px;">🌡내일 시간대별 체감온도 예보</h1>
 <div id="dateDisplay" style="margin: 8px 0;">불러오는 중...</div>
-
-<div>
-  <img src="location.png" width="20px" style="vertical-align: middle;"/>
-  <select name="locationS" id="locationS" onchange="selectS(this.value);">
-    <option value="hwaseong">화성시</option>
-    <option value="pyeongtaek">평택시</option>
-    <option value="seoul">서울시</option>
-  </select>
-  <select name="locationD_H" id="locationD_H" onchange="selectD(this.value);"></select>
-  <select name="locationD_P" id="locationD_P" onchange="selectD(this.value);"></select>
-</div>
-
-<img src="범례.png" style="margin-top: 20px; max-width: 100%; height: auto;">
-
 <div class="chart-row">
+  <canvas id="feelsHwaseong"></canvas>
   <div>
-    <canvas id="feelsHwaseong"></canvas>
-    <div>
-      ※ <strong>일 최고체감온도</strong>는 시간대별 체감온도보다 더 높겠으니,<br>
-      단계별 적극적인 대비가 필요합니다.<br>
-      <strong>[주의]</strong> 야외작업은 가급적 자제하시기 바랍니다.<br>
-      <strong>[경고]</strong> 야외작업은 피하시기 바랍니다.<br>
-      <strong>[위험]</strong> 야외작업은 매우 위험합니다.
-    </div>
+    ※ <strong>일 최고체감온도</strong>는 시간대별 체감온도보다 더 높겠으니,<br>
+    단계별 적극적인 대비가 필요합니다.<br>
+    <strong>[주의]</strong> 야외작업은 가급적 자제하시기 바랍니다.<br>
+    <strong>[경고]</strong> 야외작업은 피하시기 바랍니다.<br>
+    <strong>[위험]</strong> 야외작업은 매우 위험합니다.
   </div>
 </div>
-
-<div id="dateDisplay" style="text-align: center;"><img src="ci.png" width="100px"/></div>
-
 <script>
 const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D";
 const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
-
 const today = new Date();
 const tomorrow = new Date();
 tomorrow.setDate(today.getDate() + 1);
-
 const baseDate = today.toISOString().slice(0, 10).replace(/-/g, "");
 const targetFcstDate = tomorrow.toISOString().slice(0, 10).replace(/-/g, "");
 const tomorrowDate = targetFcstDate;
-
 document.getElementById("dateDisplay").innerText = baseDate.substr(4, 2) + '월' + baseDate.substr(6, 2) + '일 17시 발표';
-
-window.onload = function() {
-  document.getElementById('locationD_P').style.display = "none";
-  document.getElementById('locationD_H').style.display = "inline-block";
-  loadBoth(57, 119);
-}
-
-function selectS(loS) {
-  if (loS == "hwaseong") {
-    document.getElementById('locationD_H').style.display = "inline-block";
-    document.getElementById('locationD_P').style.display = "none";
-    loadBoth(57, 119);
-  } else if (loS == "pyeongtaek") {
-    document.getElementById('locationD_H').style.display = "none";
-    document.getElementById('locationD_P').style.display = "inline-block";
-    loadBoth(62, 114);
-  } else if (loS == "seoul") {
-    document.getElementById('locationD_H').style.display = "none";
-    document.getElementById('locationD_P').style.display = "none";
-    clearChart();
-    loadBoth(60, 127);
-  }
-}
-
-function selectD(loD) {
-  loadBoth(loD.split("_")[0], loD.split("_")[1]);
-}
-
-function clearChart() {
-  const canvas = document.getElementById("feelsHwaseong");
-  if (canvas && Chart.getChart(canvas)) {
-    Chart.getChart(canvas).destroy();
-  }
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
 
 async function fetchForecast(nx, ny) {
   const url = `${API_URL}?serviceKey=${API_KEY}&numOfRows=1000&pageNo=1&dataType=JSON&base_date=${baseDate}&base_time=1700&nx=${nx}&ny=${ny}`;
   const response = await fetch(url);
   const data = await response.json();
   const items = data.response.body.items.item;
-
   let temps = new Map();
   let humids = new Map();
-
   items.forEach(item => {
     if (item.fcstDate !== targetFcstDate) return;
     const time = parseInt(item.fcstTime);
@@ -140,11 +72,7 @@ async function fetchForecast(nx, ny) {
       if (item.category === "REH") humids.set(time, parseFloat(item.fcstValue));
     }
   });
-
-  const times = [];
-  const tempValues = [];
-  const humidValues = [];
-
+  const times = [], tempValues = [], humidValues = [];
   for (let t = 800; t <= 2000; t += 100) {
     if (temps.has(t) && humids.has(t)) {
       times.push(t.toString().padStart(4, "0"));
@@ -152,27 +80,23 @@ async function fetchForecast(nx, ny) {
       humidValues.push(humids.get(t));
     }
   }
-
   const feelsLikeValues = tempValues.map((Ta, i) => {
     const RH = humidValues[i];
     const Tw = calculateWetBulbTemperature(Ta, RH);
     return Math.round(calculateFeelsLikeTemperature(Ta, Tw));
   });
-
-  return { times, tempValues, feelsLikeValues };
+  return { times, feelsLikeValues };
 }
 
 function calculateWetBulbTemperature(Ta, RH) {
-  return Ta * Math.atan(0.151977 * Math.pow(RH + 8.313659, 0.5))
-    + Math.atan(Ta + RH)
-    - Math.atan(RH - 1.67633)
-    + 0.00391838 * Math.pow(RH, 1.5) * Math.atan(0.023101 * RH)
-    - 4.686035;
+  return Ta * Math.atan(0.151977 * Math.pow(RH + 8.313659, 0.5)) +
+    Math.atan(Ta + RH) - Math.atan(RH - 1.67633) +
+    0.00391838 * Math.pow(RH, 1.5) * Math.atan(0.023101 * RH) - 4.686035;
 }
 
 function calculateFeelsLikeTemperature(Ta, Tw) {
-  return -0.2442 + 0.55399 * Tw + 0.45535 * Ta
-    - 0.0022 * Tw * Tw + 0.00278 * Tw * Ta + 3.0;
+  return -0.2442 + 0.55399 * Tw + 0.45535 * Ta -
+    0.0022 * Tw * Tw + 0.00278 * Tw * Ta + 3.0;
 }
 
 function getColor(temp) {
@@ -195,6 +119,32 @@ function polarChart(ctxId, times, values, labelText) {
   const backgroundColors = values.map(getColor);
   backgroundColors.push('rgba(0,0,0,0)');
 
+  const textPlugin = {
+    id: "textPlugin",
+    afterDraw(chart) {
+      const { ctx } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const realValues = chart.data.datasets[0].realValues;
+      ctx.save();
+      meta.data.forEach((arc, i) => {
+        const label = chart.data.labels[i];
+        if (!label || label === '') return;
+        const radius = arc.outerRadius + 10;
+        const angle = (arc.startAngle + arc.endAngle) / 2;
+        const x = chart.width / 2 + radius * Math.cos(angle);
+        const y = chart.height / 2 + radius * Math.sin(angle);
+        const hourOnly = label.slice(0, 2);
+        ctx.font = "bold 14px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.fillText(hourOnly + "시", x, y);
+        const innerCenter = arc.tooltipPosition();
+        ctx.fillText(Math.round(realValues[i]) + "℃", innerCenter.x, innerCenter.y + 4);
+      });
+      ctx.restore();
+    }
+  };
+
   return new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -207,18 +157,20 @@ function polarChart(ctxId, times, values, labelText) {
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: "60%",
-      plugins: { legend: { display: false }, tooltip: { enabled: false } }
-    }
+      cutout: "70%",
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      }
+    },
+    plugins: [textPlugin]
   });
 }
 
-async function loadBoth(lo, ca) {
-  const hwaseong = await fetchForecast(lo, ca);
-  polarChart("feelsHwaseong", hwaseong.times, hwaseong.feelsLikeValues, [parseInt(tomorrowDate.substr(4, 2), 10) + '/' + tomorrowDate.substr(6, 2), '체감온도']);
-}
+(async function() {
+  const { times, feelsLikeValues } = await fetchForecast(60, 127);
+  polarChart("feelsHwaseong", times, feelsLikeValues, [parseInt(tomorrowDate.substr(4, 2), 10) + '/' + tomorrowDate.substr(6, 2), '체감온도']);
+})();
 </script>
 </body>
 </html>
