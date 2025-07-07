@@ -20,8 +20,8 @@
       margin-bottom: 20px;
     }
     canvas {
-      max-width: 300px;
-      max-height: 300px;
+      max-width: 400px;
+      max-height: 400px;
       width: 100%;
       height: auto;
     }
@@ -141,7 +141,7 @@ function polarChart(ctxId, times, values, labelText) {
       meta.data.forEach((arc, i) => {
         const label = chart.data.labels[i];
         if (!label || label === '') return;
-        const radius = arc.outerRadius + 30;
+        const radius = arc.outerRadius + 45;
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const x = chart.width / 2 + radius * Math.cos(angle);
         const y = chart.height / 2 + radius * Math.sin(angle);
@@ -185,7 +185,7 @@ function polarChart(ctxId, times, values, labelText) {
       }]
     },
   options: {
-      cutout: "60%",
+      cutout: "50%",
             rotation: 235,
   radius: '90%', 
       plugins: {
