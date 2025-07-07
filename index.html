@@ -185,8 +185,11 @@ function polarChart(ctxId, times, values, labelText) {
         realValues: values
       }]
     },
+      
     options: {
       cutout: "60%",
+            rotation: 235,
+  radius: '90%', 
       plugins: {
         legend: { display: false },
         tooltip: { enabled: false }
