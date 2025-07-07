@@ -20,8 +20,8 @@
       margin-bottom: 20px;
     }
     canvas {
-      max-width: 200px;
-      max-height: 200px;
+      max-width: 280px;
+      max-height: 280px;
       width: 100%;
       height: auto;
     }
@@ -31,10 +31,22 @@
       font-size: 16px;
       line-height: 1.5;
     }
+    select {
+      margin: 10px;
+      padding: 5px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
-<h1 style="font-size: 30px;">🌡내일 시간대별 체감온도 예보</h1>
+<h1 style="font-size: 24px; white-space: nowrap;">🌡 내일 시간대별 체감온도 예보</h1>
+<div>
+  <select id="locationSelect" onchange="changeLocation(this.value)">
+    <option value="60_127">서울시</option>
+    <option value="57_119">화성시</option>
+    <option value="62_114">평택시</option>
+  </select>
+</div>
 <div id="dateDisplay" style="margin: 8px 0;">불러오는 중...</div>
 <div class="chart-row">
   <canvas id="feelsHwaseong"></canvas>
@@ -129,7 +141,7 @@ function polarChart(ctxId, times, values, labelText) {
       meta.data.forEach((arc, i) => {
         const label = chart.data.labels[i];
         if (!label || label === '') return;
-        const radius = arc.outerRadius + 10;
+        const radius = arc.outerRadius + 20;
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const x = chart.width / 2 + radius * Math.cos(angle);
         const y = chart.height / 2 + radius * Math.sin(angle);
@@ -141,6 +153,23 @@ function polarChart(ctxId, times, values, labelText) {
         const innerCenter = arc.tooltipPosition();
         ctx.fillText(Math.round(realValues[i]) + "℃", innerCenter.x, innerCenter.y + 4);
       });
+      ctx.restore();
+    }
+  };
+
+  const centerPlugin = {
+    id: 'centerPlugin',
+    beforeDraw(chart) {
+      const { width, height, ctx } = chart;
+      const label = labelText[0] + "\n" + labelText[1];
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillStyle = 'black';
+      ctx.fillText(labelText[0], width / 2, height / 2 - 10);
+      ctx.fillStyle = '#E0002B';
+      ctx.fillText(labelText[1], width / 2, height / 2 + 10);
       ctx.restore();
     }
   };
@@ -157,20 +186,27 @@ function polarChart(ctxId, times, values, labelText) {
       }]
     },
     options: {
-      cutout: "70%",
+      cutout: "60%",
       plugins: {
         legend: { display: false },
         tooltip: { enabled: false }
       }
     },
-    plugins: [textPlugin]
+    plugins: [textPlugin, centerPlugin]
   });
 }
 
-(async function() {
-  const { times, feelsLikeValues } = await fetchForecast(60, 127);
+function changeLocation(value) {
+  const [nx, ny] = value.split("_");
+  loadChart(parseInt(nx), parseInt(ny));
+}
+
+async function loadChart(nx, ny) {
+  const { times, feelsLikeValues } = await fetchForecast(nx, ny);
   polarChart("feelsHwaseong", times, feelsLikeValues, [parseInt(tomorrowDate.substr(4, 2), 10) + '/' + tomorrowDate.substr(6, 2), '체감온도']);
-})();
+}
+
+loadChart(60, 127);
 </script>
 </body>
 </html>
