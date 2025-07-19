@@ -54,7 +54,7 @@
   
 <div class="chart-row">
 <canvas id="feelsHwaseong" width="600" height="600" style="max-width: 100%;"></canvas>
-  <div style="text-align: left; font-size: 13px;">
+  <div style="text-align: left; font-size: 13.5px;">
     ※ <strong>일 최고체감온도</strong>는 시간대별 체감온도보다 더 높겠으니,<br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;단계별 적극적인 대비가 필요합니다.<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>[주의]</strong> 야외작업은 가급적 자제하시기 바랍니다.<br>
@@ -143,10 +143,11 @@ function polarChart(ctxId, times, values, labelText) {
       const meta = chart.getDatasetMeta(0);
       const realValues = chart.data.datasets[0].realValues;
       ctx.save();
+       const highlightHours = ["09", "12", "15", "18"];
       meta.data.forEach((arc, i) => {
         const label = chart.data.labels[i];
         if (!label || label === '') return;
-        const radius = arc.outerRadius + 10;
+        const radius = arc.outerRadius + 20;
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const x = chart.width / 2 + radius * Math.cos(angle);
         const y = chart.height / 2 + radius * Math.sin(angle);
@@ -157,6 +158,21 @@ function polarChart(ctxId, times, values, labelText) {
         ctx.fillText(hourOnly + "시", x, y);
         const innerCenter = arc.tooltipPosition();
         ctx.fillText(Math.round(realValues[i]) + "℃", innerCenter.x, innerCenter.y + 4);
+
+        if (highlightHours.includes(hourOnly)) {
+  const boxWidth = 35;
+  const boxHeight = 25;
+
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(
+    x - boxWidth / 2,
+    y - boxHeight / 2,
+    boxWidth,
+    boxHeight
+  );
+}
+        
       });
       ctx.restore();
     }
