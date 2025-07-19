@@ -141,7 +141,7 @@ function polarChart(ctxId, times, values, labelText) {
       meta.data.forEach((arc, i) => {
         const label = chart.data.labels[i];
         if (!label || label === '') return;
-        const radius = arc.outerRadius + 20;
+        const radius = arc.outerRadius + 15;
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const x = chart.width / 2 + radius * Math.cos(angle);
         const y = chart.height / 2 + radius * Math.sin(angle);
