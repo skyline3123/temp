@@ -41,7 +41,9 @@
 </head>
 <body>
 <h1 style="font-size: 24px; white-space: nowrap;">🌡 내일 시간대별 체감온도 예보</h1>
+  <div id="dateDisplay" style="margin: 8px 0;">불러오는 중...</div>
 <div>
+   <img src="location.png" width="20px" style="vertical-align: middle;"/>
   <select id="locationSelect" onchange="changeLocation(this.value)">
     <option value="60_127">서울시</option>
     <option value="57_119">화성시</option>
@@ -50,7 +52,6 @@
 </div>
 <img src="범례.png" width="400" height="auto" style="margin-top: 20px;">
   
-<div id="dateDisplay" style="margin: 8px 0;">불러오는 중...</div>
 <div class="chart-row">
 <canvas id="feelsHwaseong" width="600" height="600" style="max-width: 100%;"></canvas>
   <div style="text-align: left;">
