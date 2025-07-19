@@ -1,35 +1,35 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!DOCTYPE html> <!-- HTML5 문서 선언 -->
+<html lang="ko"> <!-- 문서 언어를 한국어로 설정 -->
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>체감온도 예보</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" /> <!-- 문자 인코딩: UTF-8 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!-- 모바일 기기 대응 -->
+  <title>체감온도 예보</title> <!-- 브라우저 탭 제목 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js 라이브러리 로드 -->
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #F0F8FF;
+      font-family: 'Arial', sans-serif; /* 기본 글꼴 설정 */
+      text-align: center; /* 중앙 정렬 */
+      padding: 20px; /* 여백 */
+      background-color: #F0F8FF; /* 연한 파란 배경 */
     }
     .chart-row {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
+      display: flex; /* 가로 또는 세로로 배치 */
+      flex-direction: column; /* 세로 정렬 */
+      align-items: center; /* 중앙 정렬 */
+      gap: 30px; /* 요소 사이 여백 */
       margin-bottom: 20px;
     }
     canvas {
-      max-width: 200px;
-      max-height: 200px;
-      width: 100%;
-      height: auto;
+      max-width: 200px; /* 캔버스 최대 너비 */
+      max-height: 200px; /* 캔버스 최대 높이 */
+      width: 100%; /* 반응형 너비 */
+      height: auto; /* 높이 자동 */
     }
     .chart-row div {
-      max-width: 90vw;
-      word-break: keep-all;
+      max-width: 90vw; /* 화면 너비의 90%로 제한 */
+      word-break: keep-all; /* 단어 단위 줄바꿈 */
       font-size: 16px;
-      line-height: 1.5;
+      line-height: 1.5; /* 줄 간격 */
     }
     select {
       margin: 10px;
@@ -39,20 +39,17 @@
   </style>
 </head>
 <body>
-<h1 style="font-size: 24px; white-space: nowrap;">🌡 내일 시간대별 체감온도 예보</h1>
+<h1 style="font-size: 24px; white-space: nowrap;">🌡 내일 시간대별 체감온도 예보</h1> <!-- 제목 -->
 <div>
-  <select id="locationSelect" onchange="changeLocation(this.value)">
+  <select id="locationSelect" onchange="changeLocation(this.value)"> <!-- 지역 선택 드롭다운 -->
     <option value="60_127">서울시</option>
     <option value="57_119">화성시</option>
     <option value="62_114">평택시</option>
   </select>
 </div>
-<div id="dateDisplay" style="margin: 8px 0;">불러오는 중...</div>
+<div id="dateDisplay" style="margin: 8px 0;">불러오는 중...</div> <!-- 발표 날짜 표시 -->
 <div class="chart-row">
-
-<canvas id="feelsHwaseong" width="600" height="600" style="max-width: 100%;"></canvas>
-
-
+<canvas id="feelsHwaseong" width="600" height="600" style="max-width: 100%;"></canvas> <!-- 차트 출력 영역 -->
   <div>
     ※ <strong>일 최고체감온도</strong>는 시간대별 체감온도보다 더 높겠으니,<br>
     단계별 적극적인 대비가 필요합니다.<br>
@@ -62,31 +59,36 @@
   </div>
 </div>
 <script>
-const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D";
-const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
-const today = new Date();
-const tomorrow = new Date();
-tomorrow.setDate(today.getDate() + 1);
-const baseDate = today.toISOString().slice(0, 10).replace(/-/g, "");
-const targetFcstDate = tomorrow.toISOString().slice(0, 10).replace(/-/g, "");
-const tomorrowDate = targetFcstDate;
-document.getElementById("dateDisplay").innerText = baseDate.substr(4, 2) + '월' + baseDate.substr(6, 2) + '일 17시 발표';
+const API_KEY = "..."; // 기상청 API 키
+const API_URL = "https://apis.data.go.kr/..."; // 단기예보 API 주소
 
-async function fetchForecast(nx, ny) {
+const today = new Date(); // 오늘 날짜
+const tomorrow = new Date();
+tomorrow.setDate(today.getDate() + 1); // 내일 날짜 계산
+const baseDate = today.toISOString().slice(0, 10).replace(/-/g, ""); // API 호출용 날짜 (오늘)
+const targetFcstDate = tomorrow.toISOString().slice(0, 10).replace(/-/g, ""); // 내일 날짜
+const tomorrowDate = targetFcstDate;
+
+document.getElementById("dateDisplay").innerText = baseDate.substr(4, 2) + '월' + baseDate.substr(6, 2) + '일 17시 발표'; // 상단 날짜 표기
+
+async function fetchForecast(nx, ny) { // 예보 데이터 불러오기
   const url = `${API_URL}?serviceKey=${API_KEY}&numOfRows=1000&pageNo=1&dataType=JSON&base_date=${baseDate}&base_time=1700&nx=${nx}&ny=${ny}`;
   const response = await fetch(url);
   const data = await response.json();
   const items = data.response.body.items.item;
-  let temps = new Map();
-  let humids = new Map();
+
+  let temps = new Map(); // 기온 저장
+  let humids = new Map(); // 습도 저장
+
   items.forEach(item => {
-    if (item.fcstDate !== targetFcstDate) return;
+    if (item.fcstDate !== targetFcstDate) return; // 내일 데이터만 사용
     const time = parseInt(item.fcstTime);
-    if (time >= 800 && time <= 2000) {
+    if (time >= 800 && time <= 2000) { // 08시~20시
       if (item.category === "TMP") temps.set(time, parseFloat(item.fcstValue));
       if (item.category === "REH") humids.set(time, parseFloat(item.fcstValue));
     }
   });
+
   const times = [], tempValues = [], humidValues = [];
   for (let t = 800; t <= 2000; t += 100) {
     if (temps.has(t) && humids.has(t)) {
@@ -103,18 +105,18 @@ async function fetchForecast(nx, ny) {
   return { times, feelsLikeValues };
 }
 
-function calculateWetBulbTemperature(Ta, RH) {
+function calculateWetBulbTemperature(Ta, RH) { // 습구온도 계산
   return Ta * Math.atan(0.151977 * Math.pow(RH + 8.313659, 0.5)) +
     Math.atan(Ta + RH) - Math.atan(RH - 1.67633) +
     0.00391838 * Math.pow(RH, 1.5) * Math.atan(0.023101 * RH) - 4.686035;
 }
 
-function calculateFeelsLikeTemperature(Ta, Tw) {
+function calculateFeelsLikeTemperature(Ta, Tw) { // 체감온도 계산식
   return -0.2442 + 0.55399 * Tw + 0.45535 * Ta -
     0.0022 * Tw * Tw + 0.00278 * Tw * Ta + 3.0;
 }
 
-function getColor(temp) {
+function getColor(temp) { // 온도에 따라 색상 반환
   if (temp >= 35) return "#E0002B";
   if (temp >= 33) return "#EF5D20";
   if (temp >= 31) return "#FFCD12";
@@ -122,7 +124,7 @@ function getColor(temp) {
   return "#D5D5D5";
 }
 
-function polarChart(ctxId, times, values, labelText) {
+function polarChart(ctxId, times, values, labelText) { // 차트 생성 함수
   const canvas = document.getElementById(ctxId);
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -134,33 +136,33 @@ function polarChart(ctxId, times, values, labelText) {
   const backgroundColors = values.map(getColor);
   backgroundColors.push('rgba(0,0,0,0)');
 
-  const textPlugin = {
-  id: "textPlugin",
-  afterDraw(chart) {
-    const { ctx } = chart;
-    const meta = chart.getDatasetMeta(0);
-    const realValues = chart.data.datasets[0].realValues;
-    ctx.save();
-    meta.data.forEach((arc, i) => {
-      const label = chart.data.labels[i];
-      if (!label || label === '') return;
-      const radius = arc.outerRadius + 20;  // 외곽 텍스트 위치를 더 바깥으로
-      const angle = (arc.startAngle + arc.endAngle) / 2;
-      const x = chart.width / 2 + radius * Math.cos(angle);
-      const y = chart.height / 2 + radius * Math.sin(angle);
-      const hourOnly = label.slice(0, 2);
-      ctx.font = "bold 12px Arial";
-      ctx.fillStyle = "black";
-      ctx.textAlign = "center";
-      ctx.fillText(hourOnly + "시", x, y);
-      const innerCenter = arc.tooltipPosition();
-      ctx.fillText(Math.round(realValues[i]) + "℃", innerCenter.x, innerCenter.y + 4);
-    });
-    ctx.restore();
-  }
-};
+  const textPlugin = { // 시간 & 온도 텍스트 표시 plugin
+    id: "textPlugin",
+    afterDraw(chart) {
+      const { ctx } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const realValues = chart.data.datasets[0].realValues;
+      ctx.save();
+      meta.data.forEach((arc, i) => {
+        const label = chart.data.labels[i];
+        if (!label || label === '') return;
+        const radius = arc.outerRadius + 20; // ← 여기서 텍스트 위치 조정
+        const angle = (arc.startAngle + arc.endAngle) / 2;
+        const x = chart.width / 2 + radius * Math.cos(angle);
+        const y = chart.height / 2 + radius * Math.sin(angle);
+        const hourOnly = label.slice(0, 2);
+        ctx.font = "bold 12px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.fillText(hourOnly + "시", x, y);
+        const innerCenter = arc.tooltipPosition();
+        ctx.fillText(Math.round(realValues[i]) + "℃", innerCenter.x, innerCenter.y + 4);
+      });
+      ctx.restore();
+    }
+  };
 
-  const centerPlugin = {
+  const centerPlugin = { // 중앙 텍스트 plugin
     id: 'centerPlugin',
     beforeDraw(chart) {
       const { width, height, ctx } = chart;
@@ -187,10 +189,10 @@ function polarChart(ctxId, times, values, labelText) {
         realValues: values
       }]
     },
-  options: {
-      cutout: "50%",
-            rotation: 235,
-  radius: '90%', 
+    options: {
+      cutout: "50%", // 도넛 중심 공간 비율
+      rotation: 235, // 시작 각도
+      radius: '90%', // 전체 크기
       plugins: {
         legend: { display: false },
         tooltip: { enabled: false }
@@ -200,17 +202,17 @@ function polarChart(ctxId, times, values, labelText) {
   });
 }
 
-function changeLocation(value) {
+function changeLocation(value) { // 지역 선택 시 차트 갱신
   const [nx, ny] = value.split("_");
   loadChart(parseInt(nx), parseInt(ny));
 }
 
-async function loadChart(nx, ny) {
+async function loadChart(nx, ny) { // 차트 초기/갱신 로딩
   const { times, feelsLikeValues } = await fetchForecast(nx, ny);
   polarChart("feelsHwaseong", times, feelsLikeValues, [parseInt(tomorrowDate.substr(4, 2), 10) + '/' + tomorrowDate.substr(6, 2), '체감온도']);
 }
 
-loadChart(60, 127);
+loadChart(60, 127); // 기본 지역: 서울
 </script>
 </body>
 </html>
