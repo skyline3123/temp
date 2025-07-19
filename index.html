@@ -20,8 +20,8 @@
       margin-bottom: 20px;
     }
     canvas {
-      max-width: 250px;
-      max-height: 250px;
+      max-width: 300px;
+      max-height: 300px;
       width: 100%;
       height: auto;
     }
@@ -141,7 +141,7 @@ function polarChart(ctxId, times, values, labelText) {
       meta.data.forEach((arc, i) => {
         const label = chart.data.labels[i];
         if (!label || label === '') return;
-        const radius = arc.outerRadius + 15;
+        const radius = arc.outerRadius + 10;
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const x = chart.width / 2 + radius * Math.cos(angle);
         const y = chart.height / 2 + radius * Math.sin(angle);
