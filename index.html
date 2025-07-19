@@ -16,7 +16,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 20px;      
+      margin-top: 10px;
       margin-bottom: 20px;
     }
     canvas {
@@ -53,14 +54,15 @@
   
 <div class="chart-row">
 <canvas id="feelsHwaseong" width="600" height="600" style="max-width: 100%;"></canvas>
-  <div style="text-align: left; font-size: 12px;">
+  <div style="text-align: left; font-size: 13px;">
     ※ <strong>일 최고체감온도</strong>는 시간대별 체감온도보다 더 높겠으니,<br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;단계별 적극적인 대비가 필요합니다.<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>[주의]</strong> 야외작업은 가급적 자제하시기 바랍니다.<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>[경고]</strong> 야외작업은 피하시기 바랍니다.<br>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>[위험]</strong> 야외작업은 매우 위험합니다.
   </div>
-</div>
+</div
+  <div id="dateDisplay" style="text-align: center"><img src="ci.png" width="120px"/></div>
 <script>
 const API_KEY = "4WbcPl8cpZjq8VXOePfsXjYGid7SRm5olpV5s6WVU2qwe6cuzQCFIwqjhf45FV1x0fEtTkZnwFEoLZSG%2B69j6g%3D%3D";
 const API_URL = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
