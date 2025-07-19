@@ -186,9 +186,12 @@ function polarChart(ctxId, times, values, labelText) {
       }]
     },
   options: {
-      cutout: "50%",
-            rotation: 235,
-  radius: '90%', 
+      cutout: "60%",
+      rotation: 235,
+      radius: '90%', 
+      layout: {
+        padding: 60
+      },
       plugins: {
         legend: { display: false },
         tooltip: { enabled: false }
