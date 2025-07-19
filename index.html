@@ -136,6 +136,42 @@ function polarChart(ctxId, times, values, labelText) {
   const backgroundColors = values.map(getColor);
   backgroundColors.push('rgba(0,0,0,0)');
 
+  const centerImageWithTextPlugin = {
+    id: "centerImageWithTextPlugin",
+    beforeDraw(chart) {
+      const { width, height, ctx } = chart;
+
+      const image = new Image();
+      image.src = "./calendar.png";
+
+      image.onload = () => {
+        const size = 60;
+        const x = width / 2 - size / 2;
+        const y = height / 2 - size / 2 - 15;
+
+        ctx.save();
+        ctx.drawImage(image, x, y, size, size);
+        ctx.restore();
+
+        ctx.save();
+        ctx.font = "bold 18px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(labelText[0], width / 2, height / 2 -5);
+        ctx.restore();
+
+        ctx.save();
+        ctx.font = "bold 18px Arial";
+        ctx.fillStyle = "#E0002B";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(labelText[1], width / 2, height / 2 + 25);
+        ctx.restore();
+      };
+    }
+  };
+  
   const textPlugin = {
     id: "textPlugin",
     afterDraw(chart) {
@@ -161,7 +197,7 @@ function polarChart(ctxId, times, values, labelText) {
 
         if (highlightHours.includes(hourOnly)) {
   const boxWidth = 35;
-  const boxHeight = 20;
+  const boxHeight = 15;
 
   ctx.strokeStyle = "black";
   ctx.lineWidth = 1;
